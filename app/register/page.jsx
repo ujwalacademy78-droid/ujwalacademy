@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { FaGraduationCap, FaGoogle, FaGithub, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { supabase } from '@/lib/supabase';
 
 export default function RegisterPage() {
+    const router = useRouter();
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
@@ -15,6 +18,8 @@ export default function RegisterPage() {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -34,10 +39,43 @@ export default function RegisterPage() {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
-        // Add your registration logic here
+        setError('');
+        setLoading(true);
+
+        try {
+            // Create user in Supabase
+            const { data, error: insertError } = await supabase
+                .from('users')
+                .insert([
+                    {
+                        email: formData.email,
+                        name: formData.fullName,
+                        role: 'student',
+                        subscription: 'free'
+                    }
+                ])
+                .select();
+
+            if (insertError) {
+                if (insertError.code === '23505') {
+                    setError('Email already exists. Please login instead.');
+                } else {
+                    setError('Registration failed. Please try again.');
+                }
+                setLoading(false);
+                return;
+            }
+
+            // Registration successful
+            alert('Registration successful! Please login.');
+            router.push('/login');
+        } catch (err) {
+            console.error('Registration error:', err);
+            setError('An unexpected error occurred. Please try again.');
+            setLoading(false);
+        }
     };
 
     const getStrengthLabel = () => {
@@ -113,12 +151,17 @@ export default function RegisterPage() {
                     </Link>
 
                     <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
-                        <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
-                            Create your account
-                        </h2>
+                        <h2 className="text-3xl font-bold mb-2">Create Account</h2>
                         <p className="text-gray-600 mb-8">
-                            Fill in your details to start your 7-day free trial.
+                            Join thousands of students learning with us
                         </p>
+
+                        {/* Error Message */}
+                        {error && (
+                            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                                {error}
+                            </div>
+                        )}
 
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Full Name */}
@@ -262,9 +305,10 @@ export default function RegisterPage() {
                             {/* Submit Button */}
                             <button
                                 type="submit"
-                                className="w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-primary-dark transition-all hover:shadow-xl hover:-translate-y-0.5"
+                                disabled={loading}
+                                className="w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-primary-dark transition-all hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Create Account
+                                {loading ? 'Creating Account...' : 'Create Account'}
                             </button>
                         </form>
 

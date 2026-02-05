@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/lib/context';
 import { FaGraduationCap, FaGoogle, FaGithub, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -15,6 +16,8 @@ export default function LoginPage() {
         rememberMe: false,
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -24,24 +27,41 @@ export default function LoginPage() {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        setLoading(true);
 
-        // Determine role based on email
-        const isAdmin = formData.email === 'admin@lms.com';
-        const role = isAdmin ? 'admin' : 'student';
+        try {
+            // Check if user exists in Supabase
+            const { data: users, error: fetchError } = await supabase
+                .from('users')
+                .select('*')
+                .eq('email', formData.email)
+                .single();
 
-        // Login with context provider
-        login(formData.email, role);
-
-        // Wait for context to update, then redirect to appropriate dashboard
-        setTimeout(() => {
-            if (isAdmin) {
-                router.push('/dashboard/admin');
-            } else {
-                router.push('/dashboard/student');
+            if (fetchError || !users) {
+                setError('Invalid email or password');
+                setLoading(false);
+                return;
             }
-        }, 100);
+
+            // Login with context provider
+            login(formData.email, users.role);
+
+            // Wait for context to update, then redirect to appropriate dashboard
+            setTimeout(() => {
+                if (users.role === 'admin') {
+                    router.push('/dashboard/admin');
+                } else {
+                    router.push('/dashboard/student');
+                }
+            }, 100);
+        } catch (err) {
+            console.error('Login error:', err);
+            setError('An unexpected error occurred. Please try again.');
+            setLoading(false);
+        }
     };
 
     return (
