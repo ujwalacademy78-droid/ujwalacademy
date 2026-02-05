@@ -45,31 +45,51 @@ export default function RegisterPage() {
         setLoading(true);
 
         try {
-            // Create user in Supabase
-            const { data, error: insertError } = await supabase
-                .from('users')
-                .insert([
-                    {
-                        email: formData.email,
-                        name: formData.fullName,
-                        role: 'student',
-                        subscription: 'free'
+            // Sign up user with Supabase Auth
+            const { data: authData, error: signUpError } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        full_name: formData.fullName,
+                        phone: formData.phone,
+                        course: formData.course
                     }
-                ])
-                .select();
+                }
+            });
 
-            if (insertError) {
-                if (insertError.code === '23505') {
+            if (signUpError) {
+                if (signUpError.message.includes('already registered')) {
                     setError('Email already exists. Please login instead.');
                 } else {
-                    setError('Registration failed. Please try again.');
+                    setError(signUpError.message || 'Registration failed. Please try again.');
                 }
                 setLoading(false);
                 return;
             }
 
+            // Create user profile in users table
+            if (authData.user) {
+                const { error: profileError } = await supabase
+                    .from('users')
+                    .insert([
+                        {
+                            id: authData.user.id,
+                            email: formData.email,
+                            name: formData.fullName,
+                            role: 'student',
+                            subscription: 'free'
+                        }
+                    ]);
+
+                if (profileError) {
+                    console.error('Profile creation error:', profileError);
+                    // Continue anyway as auth user is created
+                }
+            }
+
             // Registration successful
-            alert('Registration successful! Please login.');
+            alert('Registration successful! Please check your email to verify your account, then login.');
             router.push('/login');
         } catch (err) {
             console.error('Registration error:', err);

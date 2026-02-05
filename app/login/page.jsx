@@ -33,25 +33,37 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            // Check if user exists in Supabase
-            const { data: users, error: fetchError } = await supabase
-                .from('users')
-                .select('*')
-                .eq('email', formData.email)
-                .single();
+            // Sign in with Supabase Auth
+            const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+                email: formData.email,
+                password: formData.password,
+            });
 
-            if (fetchError || !users) {
+            if (signInError) {
                 setError('Invalid email or password');
                 setLoading(false);
                 return;
             }
 
-            // Login with context provider
-            login(formData.email, users.role);
+            // Get user profile from database
+            const { data: userProfile, error: profileError } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', authData.user.id)
+                .single();
 
-            // Wait for context to update, then redirect to appropriate dashboard
+            if (profileError || !userProfile) {
+                setError('User profile not found');
+                setLoading(false);
+                return;
+            }
+
+            // Login with context provider
+            login(formData.email, userProfile.role);
+
+            // Redirect to appropriate dashboard
             setTimeout(() => {
-                if (users.role === 'admin') {
+                if (userProfile.role === 'admin') {
                     router.push('/dashboard/admin');
                 } else {
                     router.push('/dashboard/student');
