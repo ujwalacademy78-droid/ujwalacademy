@@ -15,29 +15,29 @@ export default function Hero() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <div className="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                        <div className="inline-block bg-primary/10 text-primary px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
                             🎓 WELCOME TO UJWAL
                         </div>
 
-                        <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 sm:mb-6">
                             Shape Your<br />
                             <span className="gradient-text">Digital Future</span><br />
                             In Amravati.
                         </h1>
 
-                        <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                        <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
                             An interactive platform offers Freshers, Newly Graduated, and unemployed,
                             an advanced set of solutions to help them to enhance their career.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <Link
                                 href="/register"
-                                className="bg-primary text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-dark transition-all hover:shadow-xl hover:-translate-y-1 text-center"
+                                className="bg-primary text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:bg-primary-dark transition-all hover:shadow-xl hover:-translate-y-1 text-center touch-manipulation"
                             >
                                 Enroll For Free
                             </Link>
-                            <button className="bg-secondary text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-secondary-dark transition-all hover:shadow-xl hover:-translate-y-1">
+                            <button className="bg-secondary text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:bg-secondary-dark transition-all hover:shadow-xl hover:-translate-y-1 touch-manipulation">
                                 🎬 Upgrade Basics
                             </button>
                         </div>

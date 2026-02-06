@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { FaGraduationCap } from 'react-icons/fa';
+import { FaBars, FaTimes } from 'react-icons/fa';
 
 export default function Navbar() {
     const [activeSection, setActiveSection] = useState('home');
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -19,6 +20,11 @@ export default function Navbar() {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    // Close mobile menu when route changes
+    useEffect(() => {
+        setIsMobileMenuOpen(false);
+    }, [pathname]);
 
     // Only track active section on homepage
     useEffect(() => {
@@ -49,6 +55,8 @@ export default function Navbar() {
     }, [pathname]);
 
     const handleNavClick = (sectionId) => {
+        setIsMobileMenuOpen(false); // Close mobile menu
+
         // If we're not on the homepage, navigate to homepage first
         if (pathname !== '/') {
             router.push('/');
@@ -73,34 +81,36 @@ export default function Navbar() {
         return null;
     }
 
+    const navItems = [
+        { id: 'home', label: 'Home' },
+        { id: 'courses', label: 'Courses' },
+        { id: 'mentors', label: 'Mentors' },
+        { id: 'about', label: 'About' },
+    ];
+
     return (
         <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md' : 'bg-white/95 backdrop-blur-sm'
             }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center">
+                    <Link href="/" className="flex items-center flex-shrink-0">
                         <img
                             src="/logo-final.png"
                             alt="Ujwal Academy"
-                            className="h-10 w-auto object-contain"
+                            className="h-8 sm:h-10 w-auto object-contain"
                         />
                     </Link>
 
-                    {/* Navigation Links */}
+                    {/* Desktop Navigation Links */}
                     <div className="hidden md:flex items-center gap-8">
-                        {[
-                            { id: 'home', label: 'Home' },
-                            { id: 'courses', label: 'Courses' },
-                            { id: 'mentors', label: 'Mentors' },
-                            { id: 'about', label: 'About' },
-                        ].map((item) => (
+                        {navItems.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => handleNavClick(item.id)}
                                 className={`relative font-medium transition-colors ${pathname === '/' && activeSection === item.id
-                                    ? 'text-primary'
-                                    : 'text-gray-600 hover:text-primary'
+                                        ? 'text-primary'
+                                        : 'text-gray-600 hover:text-primary'
                                     }`}
                             >
                                 {item.label}
@@ -111,12 +121,11 @@ export default function Navbar() {
                         ))}
                     </div>
 
-
-                    {/* CTA Buttons */}
-                    <div className="flex items-center gap-4">
+                    {/* Desktop CTA Buttons */}
+                    <div className="hidden md:flex items-center gap-4">
                         <Link
                             href="/login"
-                            className="hidden sm:block text-primary font-semibold hover:text-primary-dark transition-colors"
+                            className="text-primary font-semibold hover:text-primary-dark transition-colors"
                         >
                             Login
                         </Link>
@@ -126,6 +135,68 @@ export default function Navbar() {
                         >
                             📚 Enroll Now
                         </Link>
+                    </div>
+
+                    {/* Mobile Menu Button */}
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="md:hidden p-2 rounded-lg text-gray-600 hover:text-primary hover:bg-gray-100 transition-colors"
+                        aria-label="Toggle menu"
+                    >
+                        {isMobileMenuOpen ? (
+                            <FaTimes className="w-6 h-6" />
+                        ) : (
+                            <FaBars className="w-6 h-6" />
+                        )}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Menu Drawer */}
+            <div
+                className={`md:hidden fixed inset-0 top-16 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                    }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+            >
+                <div
+                    className={`bg-white w-full max-w-sm ml-auto h-full shadow-xl transform transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+                        }`}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="flex flex-col h-full p-6">
+                        {/* Mobile Navigation Links */}
+                        <div className="flex flex-col gap-4 mb-8">
+                            {navItems.map((item) => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => handleNavClick(item.id)}
+                                    className={`text-left py-3 px-4 rounded-lg font-medium transition-all ${pathname === '/' && activeSection === item.id
+                                            ? 'bg-primary/10 text-primary'
+                                            : 'text-gray-700 hover:bg-gray-100'
+                                        }`}
+                                >
+                                    {item.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Mobile CTA Buttons */}
+                        <div className="flex flex-col gap-3 mt-auto">
+                            <Link
+                                href="/login"
+                                className="w-full text-center py-3 px-6 rounded-lg font-semibold text-primary border-2 border-primary hover:bg-primary/10 transition-all"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Login
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="w-full text-center py-3 px-6 rounded-lg font-semibold bg-primary text-white hover:bg-primary-dark transition-all shadow-lg"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                📚 Enroll Now
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
