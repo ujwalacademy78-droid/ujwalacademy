@@ -40,10 +40,19 @@ export default function LoginPage() {
             });
 
             if (signInError) {
+                console.error('Sign in error:', signInError);
                 setError('Invalid email or password');
                 setLoading(false);
                 return;
             }
+
+            if (!authData.user) {
+                setError('Authentication failed. Please try again.');
+                setLoading(false);
+                return;
+            }
+
+            console.log('Auth successful, user ID:', authData.user.id);
 
             // Get user profile from database
             const { data: userProfile, error: profileError } = await supabase
@@ -52,11 +61,22 @@ export default function LoginPage() {
                 .eq('id', authData.user.id)
                 .single();
 
-            if (profileError || !userProfile) {
-                setError('User profile not found');
+            console.log('Profile query result:', { userProfile, profileError });
+
+            if (profileError) {
+                console.error('Profile fetch error:', profileError);
+                setError(`Profile error: ${profileError.message}. Please contact support.`);
                 setLoading(false);
                 return;
             }
+
+            if (!userProfile) {
+                setError('User profile not found. Please contact support.');
+                setLoading(false);
+                return;
+            }
+
+            console.log('Login successful, role:', userProfile.role);
 
             // Login with context provider
             login(formData.email, userProfile.role);
