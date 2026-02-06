@@ -57,7 +57,7 @@ export interface AppState {
 }
 
 interface AppContextType extends AppState {
-    login: (email: string, role: Role) => void;
+    login: (email: string, role: Role, userData?: Partial<User>) => void;
     logout: () => void;
     registerStudent: (student: Omit<User, "id" | "role" | "status" | "subscription">) => void;
     updateUserStatus: (id: string, status: "active" | "blocked" | "deleted") => void;
@@ -123,8 +123,23 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const [notes, setNotes] = useState<Note[]>(INITIAL_NOTES);
     const [exams, setExams] = useState<Exam[]>(INITIAL_EXAMS);
 
-    const login = (email: string, role: Role) => {
-        // Simple mock login
+    const login = (email: string, role: Role, userData?: Partial<User>) => {
+        // If userData is provided (from Supabase), use it directly
+        if (userData) {
+            const user: User = {
+                id: userData.id || Date.now().toString(),
+                name: userData.name || email.split('@')[0],
+                email: email,
+                role: role,
+                subscription: (userData.subscription as "free" | "premium") || "free",
+                status: (userData.status as "active" | "blocked") || "active",
+                avatar: userData.avatar
+            };
+            setCurrentUser(user);
+            return;
+        }
+
+        // Fallback to mock data check (for admin dashboard demo)
         const user = users.find(u => u.email === email && u.role === role);
         if (user) {
             if (user.status === 'blocked') {

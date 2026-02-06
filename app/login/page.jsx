@@ -93,8 +93,15 @@ export default function LoginPage() {
             // Determine user role (default to student if profile not found)
             const userRole = userProfile?.role || 'student';
 
-            // Login with context provider
-            login(authData.user.email, userRole);
+            // Login with context provider, passing the full user data
+            login(authData.user.email, userRole, userProfile || {
+                id: authData.user.id,
+                name: authData.user.user_metadata?.full_name || authData.user.email.split('@')[0],
+                email: authData.user.email,
+                role: userRole,
+                subscription: 'free',
+                status: 'active'
+            });
 
             // Redirect to appropriate dashboard
             setTimeout(() => {
