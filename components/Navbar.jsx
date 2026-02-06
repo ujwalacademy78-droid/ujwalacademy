@@ -109,8 +109,8 @@ export default function Navbar() {
                                 key={item.id}
                                 onClick={() => handleNavClick(item.id)}
                                 className={`relative font-medium transition-colors ${pathname === '/' && activeSection === item.id
-                                        ? 'text-primary'
-                                        : 'text-gray-600 hover:text-primary'
+                                    ? 'text-primary'
+                                    : 'text-gray-600 hover:text-primary'
                                     }`}
                             >
                                 {item.label}
@@ -154,7 +154,7 @@ export default function Navbar() {
 
             {/* Mobile Menu Drawer */}
             <div
-                className={`md:hidden fixed inset-0 top-16 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                className={`md:hidden fixed inset-0 top-16 bg-black/50 backdrop-blur-sm transition-opacity duration-300 z-[60] ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
                     }`}
                 onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -171,8 +171,8 @@ export default function Navbar() {
                                     key={item.id}
                                     onClick={() => handleNavClick(item.id)}
                                     className={`text-left py-3 px-4 rounded-lg font-medium transition-all ${pathname === '/' && activeSection === item.id
-                                            ? 'bg-primary/10 text-primary'
-                                            : 'text-gray-700 hover:bg-gray-100'
+                                        ? 'bg-primary/10 text-primary'
+                                        : 'text-gray-700 hover:bg-gray-100'
                                         }`}
                                 >
                                     {item.label}
