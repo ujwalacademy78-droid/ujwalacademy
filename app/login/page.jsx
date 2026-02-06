@@ -63,27 +63,42 @@ export default function LoginPage() {
 
             console.log('Profile query result:', { userProfile, profileError });
 
-            if (profileError) {
-                console.error('Profile fetch error:', profileError);
-                setError(`Profile error: ${profileError.message}. Please contact support.`);
-                setLoading(false);
-                return;
+            // If profile doesn't exist, create it
+            if (profileError || !userProfile) {
+                console.log('Profile not found, creating one...');
+
+                const { data: newProfile, error: createError } = await supabase
+                    .from('users')
+                    .insert([
+                        {
+                            id: authData.user.id,
+                            email: authData.user.email,
+                            name: authData.user.user_metadata?.full_name || authData.user.email.split('@')[0],
+                            role: 'student',
+                            subscription: 'free'
+                        }
+                    ])
+                    .select()
+                    .single();
+
+                if (createError) {
+                    console.error('Profile creation error:', createError);
+                    // Continue anyway - redirect to dashboard
+                    console.log('Continuing to dashboard despite profile creation error');
+                }
             }
 
-            if (!userProfile) {
-                setError('User profile not found. Please contact support.');
-                setLoading(false);
-                return;
-            }
+            console.log('Login successful, redirecting to dashboard...');
 
-            console.log('Login successful, role:', userProfile.role);
+            // Determine user role (default to student if profile not found)
+            const userRole = userProfile?.role || 'student';
 
             // Login with context provider
-            login(formData.email, userProfile.role);
+            login(authData.user.email, userRole);
 
             // Redirect to appropriate dashboard
             setTimeout(() => {
-                if (userProfile.role === 'admin') {
+                if (userRole === 'admin') {
                     router.push('/dashboard/admin');
                 } else {
                     router.push('/dashboard/student');
