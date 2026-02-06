@@ -68,28 +68,8 @@ export default function RegisterPage() {
                 return;
             }
 
-            // Create user profile in users table
-            if (authData.user) {
-                const { error: profileError } = await supabase
-                    .from('users')
-                    .insert([
-                        {
-                            id: authData.user.id,
-                            email: formData.email,
-                            name: formData.fullName,
-                            role: 'student',
-                            subscription: 'free'
-                        }
-                    ]);
-
-                if (profileError) {
-                    console.error('Profile creation error:', profileError);
-                    // Continue anyway as auth user is created
-                }
-            }
-
-            // Registration successful
-            alert('Registration successful! Please check your email to verify your account, then login.');
+            // Registration successful - profile is auto-created by database trigger
+            alert('Registration successful! You can now login.');
             router.push('/login');
         } catch (err) {
             console.error('Registration error:', err);
