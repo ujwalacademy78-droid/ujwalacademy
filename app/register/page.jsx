@@ -74,36 +74,26 @@ export default function RegisterPage() {
                 return;
             }
 
-            // Wait a moment for trigger to execute
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Create profile using API route
+            const profileResponse = await fetch('/api/create-profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: authData.user.id,
+                    email: formData.email,
+                    name: formData.fullName
+                })
+            });
 
-            // Check if profile was created by trigger
-            const { data: existingProfile } = await supabase
-                .from('users')
-                .select('id')
-                .eq('id', authData.user.id)
-                .single();
+            const profileResult = await profileResponse.json();
 
-            // If trigger didn't create profile, create it manually
-            if (!existingProfile) {
-                const { error: profileError } = await supabase
-                    .from('users')
-                    .insert([
-                        {
-                            id: authData.user.id,
-                            email: formData.email,
-                            name: formData.fullName,
-                            role: 'student',
-                            subscription: 'free'
-                        }
-                    ]);
-
-                if (profileError) {
-                    console.error('Profile creation error:', profileError);
-                    setError('Registration completed but profile creation failed. Please contact support.');
-                    setLoading(false);
-                    return;
-                }
+            if (!profileResult.success) {
+                console.error('Profile creation failed:', profileResult.error);
+                setError('Account created but profile setup failed. Please contact support.');
+                setLoading(false);
+                return;
             }
 
             // Registration successful
