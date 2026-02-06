@@ -115,12 +115,6 @@ export default function Navbar() {
                     {/* CTA Buttons */}
                     <div className="flex items-center gap-4">
                         <Link
-                            href="/dashboard/student"
-                            className="hidden sm:block text-gray-700 font-semibold hover:text-primary transition-colors"
-                        >
-                            Dashboard
-                        </Link>
-                        <Link
                             href="/login"
                             className="hidden sm:block text-primary font-semibold hover:text-primary-dark transition-colors"
                         >
