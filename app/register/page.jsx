@@ -68,7 +68,45 @@ export default function RegisterPage() {
                 return;
             }
 
-            // Registration successful - profile is auto-created by database trigger
+            if (!authData.user) {
+                setError('Registration failed. Please try again.');
+                setLoading(false);
+                return;
+            }
+
+            // Wait a moment for trigger to execute
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Check if profile was created by trigger
+            const { data: existingProfile } = await supabase
+                .from('users')
+                .select('id')
+                .eq('id', authData.user.id)
+                .single();
+
+            // If trigger didn't create profile, create it manually
+            if (!existingProfile) {
+                const { error: profileError } = await supabase
+                    .from('users')
+                    .insert([
+                        {
+                            id: authData.user.id,
+                            email: formData.email,
+                            name: formData.fullName,
+                            role: 'student',
+                            subscription: 'free'
+                        }
+                    ]);
+
+                if (profileError) {
+                    console.error('Profile creation error:', profileError);
+                    setError('Registration completed but profile creation failed. Please contact support.');
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            // Registration successful
             alert('Registration successful! You can now login.');
             router.push('/login');
         } catch (err) {
