@@ -74,27 +74,9 @@ export default function RegisterPage() {
                 return;
             }
 
-            // Create profile using API route
-            const profileResponse = await fetch('/api/create-profile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId: authData.user.id,
-                    email: formData.email,
-                    name: formData.fullName
-                })
-            });
-
-            const profileResult = await profileResponse.json();
-
-            if (!profileResult.success) {
-                console.error('Profile creation failed:', profileResult.error);
-                setError('Account created but profile setup failed. Please contact support.');
-                setLoading(false);
-                return;
-            }
+            // Profile is automatically created by database trigger
+            // No need to call API route
+            console.log('User registered successfully:', authData.user.id);
 
             // Registration successful
             alert('Registration successful! You can now login.');
