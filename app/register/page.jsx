@@ -59,10 +59,12 @@ export default function RegisterPage() {
             });
 
             if (signUpError) {
-                if (signUpError.message.includes('already registered')) {
+                console.error('Supabase signup error:', signUpError);
+                if (signUpError.message.includes('already registered') || signUpError.message.includes('already been registered')) {
                     setError('Email already exists. Please login instead.');
                 } else {
-                    setError(signUpError.message || 'Registration failed. Please try again.');
+                    // Show the actual error from Supabase for debugging
+                    setError(`Registration failed: ${signUpError.message}`);
                 }
                 setLoading(false);
                 return;
